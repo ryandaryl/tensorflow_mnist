@@ -42,7 +42,7 @@ def handle_job():
         else:
             response = { 'id': None, 'error_message': 'No job exists with the id number ' + query_id }
     else:
-        new_job = q.enqueue(run_script, 'scripts/fit_a_line.py', timeout='1h')
+        new_job = q.enqueue(run_script, timeout='1h')
         response = render_template('wait.html', status=get_status(new_job))
     return response
 
