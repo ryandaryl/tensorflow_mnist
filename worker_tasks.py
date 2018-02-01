@@ -1,7 +1,7 @@
 import base64
 import requests
 from cStringIO import StringIO
-from scripts.mnist import main
+from scripts.mnist_softmax import main
 
 def png_encode(fig):
     io = StringIO()
