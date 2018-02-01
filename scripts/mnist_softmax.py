@@ -42,10 +42,15 @@ def main(_):
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
   # Test trained model
+  output = []
   for e, _ in enumerate(range(5)):
-    guess_y = sess.run(tf.argmax(y, 1), feed_dict={x: [mnist.test.images[e]]})[0]
-    print('Guess:', guess_y, '| Value:', list(mnist.test.labels[e]).index(1))
-    print(vec_to_png(mnist.test.images[e], 28, 28))
+    test = {
+      'guess': sess.run(tf.argmax(y, 1), feed_dict={x: [mnist.test.images[e]]})[0],
+      'value': list(mnist.test.labels[e]).index(1),
+      'image': vec_to_png(mnist.test.images[e], 28, 28)
+    }
+    output.append(test)
+  return(output)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

@@ -8,7 +8,7 @@ app = Flask(__name__)
 q = Queue(connection=conn)
 
 def get_status(job):
-    app_url = 'https://tensor-rdm.herokuapp.com'
+    app_url = 'https://mnist-rdm.herokuapp.com'
     status = {
         'id': job.id,
         'result': job.result,
