@@ -4,6 +4,8 @@ from __future__ import print_function
 
 import argparse
 import sys
+import os
+import png
 
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -11,6 +13,17 @@ import tensorflow as tf
 
 FLAGS = None
 
+def vec_to_png(data, rows, cols):
+    output_filename = os.path.join('myfile' + ".png")
+    print("writing " + output_filename)
+    with open(output_filename, "wb") as h:
+        w = png.Writer(cols, rows, greyscale=True)
+        image_array = []
+        for i in range(cols):
+            row = [round(255 - j * 255) for j in data[i*rows: (i + 1)*rows]]
+            print(row)
+            image_array.append(row)
+        w.write(h, image_array)
 
 def main(_):
   data_dir = '/tmp/tensorflow/mnist/input_data'
@@ -30,6 +43,8 @@ def main(_):
 
   for e, _ in enumerate(range(1000)):
     batch_xs, batch_ys = mnist.train.next_batch(100)
+    if e == 20:
+        vec_to_png(batch_xs[0], 28, 28)
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
   # Test trained model
@@ -37,6 +52,7 @@ def main(_):
   accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
   print('accuracy:', sess.run(accuracy, feed_dict={x: mnist.test.images,
                                       y_: mnist.test.labels}))
+  os.system('curl -T myfile.png ftp://nfio.co.nf --user "2153020_rdm":"(Password11)"')
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
