@@ -5,25 +5,21 @@ from __future__ import print_function
 import argparse
 import sys
 import os
-import png
-
+import base64
+from io import BytesIO
+from PIL import Image
 from tensorflow.examples.tutorials.mnist import input_data
-
 import tensorflow as tf
+import numpy as np
 
 FLAGS = None
 
 def vec_to_png(data, rows, cols):
-    output_filename = os.path.join('myfile' + ".png")
-    print("writing " + output_filename)
-    with open(output_filename, "wb") as h:
-        w = png.Writer(cols, rows, greyscale=True)
-        image_array = []
-        for i in range(cols):
-            row = [round(255 - j * 255) for j in data[i*rows: (i + 1)*rows]]
-            print(row)
-            image_array.append(row)
-        w.write(h, image_array)
+  image_array = 255 - np.reshape(data,(28,28))*255
+  pil_img = Image.fromarray(image_array).convert('L')
+  buffer = BytesIO()
+  pil_img.save(buffer, format="PNG")
+  return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def main(_):
   data_dir = '/tmp/tensorflow/mnist/input_data'
@@ -43,16 +39,13 @@ def main(_):
 
   for e, _ in enumerate(range(1000)):
     batch_xs, batch_ys = mnist.train.next_batch(100)
-    if e == 20:
-        vec_to_png(batch_xs[0], 28, 28)
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
   # Test trained model
-  correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-  accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-  print('accuracy:', sess.run(accuracy, feed_dict={x: mnist.test.images,
-                                      y_: mnist.test.labels}))
-  os.system('curl -T myfile.png ftp://nfio.co.nf --user "2153020_rdm":"(Password11)"')
+  for e, _ in enumerate(range(5)):
+    guess_y = sess.run(tf.argmax(y, 1), feed_dict={x: [mnist.test.images[e]]})[0]
+    print('Guess:', guess_y, '| Value:', list(mnist.test.labels[e]).index(1))
+    print(vec_to_png(mnist.test.images[e], 28, 28))
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
